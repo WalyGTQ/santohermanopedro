@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sitio en Construcción — Iglesia</title>
+  <meta name="description" content="Sitio en construcción: pronto compartiremos más fe, esperanza y amor." />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --gold:#d4af37;
+      --white:#ffffff;
+      --sky:#bcd9ea;
+      --deep:#1a2a6c;
+      --text:#0e1533;
+      --muted:#6b7a90;
+      --glow: rgba(212,175,55,0.55);
+      transition: background-color .4s ease, color .4s ease;
+    }
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue","Noto Sans",sans-serif;
+      line-height:1.6;
+      /* Fondo: gradiente “luz divina” + halo radial */
+      background:
+        radial-gradient(1200px 800px at 50% -10%, rgba(255,255,255,0.85), transparent 60%),
+        linear-gradient(180deg, #ffffff 0%, #f4f8fb 30%, #e6f0f7 60%, #dbe9f4 75%, #cfe2f0 85%, #c6ddef 92%, var(--sky) 100%),
+        radial-gradient(1600px 1000px at 50% 30%, rgba(255,255,255,0.8), rgba(255,255,255,0) 60%),
+        linear-gradient(135deg, #fff 0%, #fdfdfd 10%, #f5f7ff 40%, #eaf1ff 65%, #e0ecff 85%, #d7e7ff 100%);
+      overflow-x:hidden;
+      transition: background .4s ease;
+    }
+
+    /* Interruptor Día/Noche */
+    .theme-switch{
+      position:fixed; top:clamp(10px, 2vw, 20px); right:clamp(10px, 2vw, 20px);
+      z-index:40;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid rgba(26,42,108,0.15);
+      border-radius: 99px;
+      width:40px; height:40px;
+      font-size: 20px; line-height:1;
+      cursor:pointer;
+      box-shadow: 0 4px 12px rgba(26,42,108,0.1);
+      transition: all .3s ease;
+    }
+
+    /* Rayos de luz sutiles al fondo (SVG embebido como mask) */
+    .rays{
+      position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.45;
+      background:
+        conic-gradient(from 260deg at 50% 0%, rgba(255,255,255,0.75), rgba(255,255,255,0) 30% 100%),
+        conic-gradient(from 280deg at 50% 0%, rgba(255,255,255,0.5), rgba(255,255,255,0) 25% 100%);
+      mix-blend-mode:screen;
+      mask-image: radial-gradient(1200px 700px at 50% 0%, black 55%, transparent 80%);
+    }
+
+    /* Canvas de partículas */
+    #particles{
+      position:fixed; inset:0; z-index:1; pointer-events:none;
+    }
+
+    .blur-temple{
+      position:fixed; inset:auto auto 5% 50%;
+      width:min(70vw, 720px); height:auto; transform:translateX(-50%);
+      opacity:0.10; filter:blur(2px);
+      z-index:1; pointer-events:none;
+    }
+
+    .page{
+      position:relative; z-index:2; min-height:100%;
+      display:grid; place-items:center;
+      padding:clamp(16px,3vw,32px);
+    }
+
+    .card{
+      width: min(980px, 100%);
+      background: rgba(255,255,255,0.65);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.6);
+      border-radius: 20px;
+      box-shadow:
+        0 20px 40px rgba(26,42,108,0.15),
+        0 0 0 1px rgba(255,255,255,0.6) inset;
+      padding: clamp(20px, 4vw, 44px);
+      text-align:center;
+      animation: fadeInUp .9s ease both;
+    }
+
+    .title{
+      font-family:"Cinzel", serif;
+      font-weight:700;
+      font-size: clamp(28px, 6vw, 54px);
+      letter-spacing:.02em;
+      color: var(--deep);
+      margin: 6px 0 8px;
+      text-shadow:
+        0 0 18px var(--glow),
+        0 0 2px rgba(0,0,0,0.06);
+      position:relative;
+    }
+
+    /* Resplandor dorado pulsante */
+    .title::after{
+      content:"";
+      position:absolute; left:50%; bottom:-10px; transform:translateX(-50%);
+      width: clamp(120px, 28vw, 320px); height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      filter: drop-shadow(0 0 10px var(--glow));
+      border-radius:999px;
+      animation: glow 3.6s ease-in-out infinite;
+    }
+
+    .subtitle{
+      font-size: clamp(16px, 2.5vw, 22px);
+      color: #32405e;
+      margin: 10px 0 22px;
+      opacity:0; animation: fadeIn .9s .25s ease forwards;
+    }
+
+    /* Cruz dorada animada */
+    .cross{
+      font-size: clamp(44px, 7vw, 72px);
+      line-height: 1;
+      margin:0 auto 14px; display: block; /* display:block para que el margin:auto funcione */
+      color: var(--gold);
+      filter: drop-shadow(0 6px 12px rgba(212,175,55,0.35));
+      animation: float 5.5s ease-in-out infinite;
+    }
+
+    /* Paloma flotante */
+    .dove{
+      position:absolute; right: clamp(6px, 4vw, 40px); top: clamp(0px, 1vw, 10px);
+      font-size: clamp(36px, 6.5vw, 64px);
+      line-height: 1;
+      opacity:.9;
+      animation: floatAlt 6.5s ease-in-out infinite;
+      filter: drop-shadow(0 10px 14px rgba(26,42,108,0.15));
+    }
+
+    /* Botones */
+    .actions{
+      margin: 22px 0 6px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap;
+      opacity:0; animation: fadeIn .9s .6s ease forwards;
+    }
+    .btn{
+      appearance:none; border:0; cursor:pointer;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-weight:600;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .btn-primary{
+      color:#0b1333; background:
+        radial-gradient(120% 120% at 50% 0%, rgba(255,255,255,0.8), rgba(255,255,255,0.2) 60%),
+        linear-gradient(180deg, #ffe9a6, #f7d26b 55%, #e7c154);
+      box-shadow: 0 8px 18px rgba(212,175,55,0.35), inset 0 1px 0 rgba(255,255,255,0.7);
+      border:1px solid rgba(212,175,55,0.7);
+    }
+    .btn-primary:hover{ transform: translateY(-2px); box-shadow: 0 12px 26px rgba(212,175,55,0.45) }
+    .btn-outline{
+      color:#0b1333; background:rgba(255,255,255,0.7);
+      border:1px solid rgba(26,42,108,0.25);
+      box-shadow: 0 8px 18px rgba(26,42,108,0.08);
+    }
+    .btn-outline:hover{ transform: translateY(-2px); box-shadow: 0 12px 26px rgba(26,42,108,0.15) }
+
+    /* Footer */
+    footer{
+      margin-top: 22px; font-size: 14px; color:#2a3b61;
+      opacity:.9;
+    }
+    footer .verse{
+      font-family:"Playfair Display", "Cinzel", serif;
+      font-style:italic;
+    }
+
+    /* Modal de contacto */
+    .modal{
+      position:fixed; inset:0; display:none; align-items:center; justify-content:center; z-index:50;
+      background: rgba(10,16,40,0.35);
+      backdrop-filter: blur(4px);
+      padding:20px;
+    }
+    .modal.open{ display:flex; animation: fadeIn .25s ease both }
+    .modal-card{
+      width:min(520px, 100%); background: #fff; border-radius:16px; padding:22px;
+      border:1px solid rgba(26,42,108,0.1);
+      box-shadow: 0 18px 40px rgba(26,42,108,0.2);
+      position:relative;
+    }
+    .modal-title{
+      font-family:"Cinzel",serif; margin:0 0 6px; color:var(--deep);
+    }
+    .contact-list{ margin: 12px 0 0; padding:0; list-style:none; text-align:left }
+    .contact-list li{ padding:10px 0; border-bottom:1px dashed rgba(26,42,108,0.15) }
+    .contact-list a{
+      color:#123; text-decoration:none; font-weight:600;
+    }
+    .close{
+      position:absolute; right:10px; top:8px; border:0; background:transparent; cursor:pointer; font-size:22px; line-height:1;
+      color:#637190;
+    }
+    .close:hover{ color:#1a2a6c }
+
+    /* Preferencias de movimiento reducido */
+    @media (prefers-reduced-motion: reduce){
+      .title,.subtitle,.actions{ animation:none !important }
+      .cross,.dove{ animation:none !important }
+      body, .card, .modal-card, .theme-switch { transition: none !important; }
+    }
+
+    /* ==================== MODO NOCHE ==================== */
+    body.night-mode{
+      color: #cdd6f4;
+      background:
+        radial-gradient(1200px 800px at 50% -10%, rgba(255,255,255,0.08), transparent 60%),
+        linear-gradient(180deg, #0a0f25 0%, #0d142c 30%, #111838 60%, #1a2a6c 100%);
+    }
+    body.night-mode .rays{
+      opacity: .15;
+      background:
+        conic-gradient(from 260deg at 50% 0%, rgba(255,255,255,0.15), rgba(255,255,255,0) 30% 100%),
+        conic-gradient(from 280deg at 50% 0%, rgba(255,255,255,0.1), rgba(255,255,255,0) 25% 100%);
+    }
+    body.night-mode .blur-temple{ opacity: 0.06; }
+    body.night-mode .card{
+      background: rgba(17, 24, 56, 0.65);
+      border-color: rgba(26, 42, 108, 0.8);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(26,42,108,0.5) inset;
+    }
+    body.night-mode .title{ color: #f0f4ff; }
+    body.night-mode .subtitle{ color: #a6b7d5; }
+    body.night-mode .dove{ filter: drop-shadow(0 10px 14px rgba(0,0,0,0.25)); }
+    body.night-mode footer{ color: #a6b7d5; }
+    body.night-mode .theme-switch{
+      background: rgba(17, 24, 56, 0.7);
+      border-color: rgba(100, 120, 180, 0.5);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    body.night-mode .modal-card{
+      background: #111838;
+      border-color: rgba(100, 120, 180, 0.5);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.3);
+    }
+    body.night-mode .modal-title{ color: #f0f4ff; }
+    body.night-mode .modal-card p,
+    body.night-mode .contact-list a{ color: #cdd6f4; }
+    body.night-mode .contact-list li{ border-color: rgba(100, 120, 180, 0.2); }
+    body.night-mode .close{ color: #a6b7d5; }
+    body.night-mode .close:hover{ color: #fff; }
+
+    /* Transiciones suaves para modo noche */
+    .card, .modal-card, .theme-switch {
+      transition: background .4s ease, border-color .4s ease, box-shadow .4s ease;
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none} }
+    @keyframes fadeInUp{ from{opacity:0; transform:translateY(12px)} to{opacity:1; transform:none} }
+    @keyframes glow{ 0%,100%{opacity:.8; filter: drop-shadow(0 0 8px var(--glow))} 50%{opacity:1; filter: drop-shadow(0 0 20px var(--glow))} }
+    @keyframes float{ 0%,100%{ transform: translateY(0) } 50%{ transform: translateY(-8px) } }
+    @keyframes floatAlt{ 0%,100%{ transform: translateY(0) rotate(-2deg)} 50%{ transform: translateY(-10px) rotate(2deg)} }
+
+    /* Responsivo fino */
+    @media (max-width:520px){
+      .modal-card{ padding:16px }
+    }
+  </style>
+</head>
+<body>
+  <!-- Rayos y partículas -->
+  <div class="rays" aria-hidden="true"></div>
+  <canvas id="particles" aria-hidden="true"></canvas>
+
+  <!-- Interruptor de Tema -->
+  <button class="theme-switch" id="themeSwitch" title="Cambiar tema">🌙</button>
+
+  <!-- Templo difuminado (SVG inline) -->
+  <svg class="blur-temple" viewBox="0 0 900 320" role="img" aria-label="Templo difuminado">
+    <defs>
+      <linearGradient id="tgrad" x1="0" x2="0" y1="0" y2="1">
+        <stop offset="0%" stop-color="#1a2a6c" stop-opacity="0.25"/>
+        <stop offset="100%" stop-color="#1a2a6c" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <path d="M60 280 H840 V260 H780 V210 H720 V260 H640 V200 H580 V260 H520 V220 H480 V260 H420 V210 H360 V260 H300 V200 H240 V260 H200 V280 Z" fill="url(#tgrad)"/>
+    <rect x="430" y="120" width="40" height="90" fill="url(#tgrad)"/>
+    <path d="M450 60 L490 120 H410 Z" fill="url(#tgrad)"/>
+  </svg>
+
+  <main class="page">
+    <section class="card" role="region" aria-labelledby="titulo">
+      <!-- Cruz dorada -->
+      <span class="cross" aria-hidden="true">✝</span>
+
+      <!-- Paloma -->
+      <span class="dove" role="img" aria-label="Paloma del Espíritu Santo">🕊️</span>
+
+      <h1 id="titulo" class="title">Sitio en Construcción</h1>
+      <p class="subtitle">“Pronto compartiremos más fe, esperanza y amor.”</p>
+
+      <div class="actions" role="group" aria-label="Acciones">
+        <button class="btn btn-primary" id="openModal" aria-haspopup="dialog" aria-controls="contactModal">Contáctanos</button>
+      </div>
+
+      <footer>
+        <div class="verse">“El Señor guiará nuestro camino — Isaías 58:11”</div>
+      </footer>
+    </section>
+  </main>
+
+  <!-- Modal de contacto -->
+  <div class="modal" id="contactModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-card">
+      <button class="close" id="closeModal" aria-label="Cerrar">✕</button>
+      <h2 id="modalTitle" class="modal-title">Contacto</h2>
+      <p style="margin:6px 0 12px;color:#2a3b61">¡Será un gusto atenderte!</p>
+      <ul class="contact-list">
+        <li>Email: <a href="mailto:info@parroquia.org">info@parroquia.org</a></li>
+        <li>Facebook: <a href="https://facebook.com/tuparroquia" target="_blank" rel="noopener">facebook.com/tuparroquia</a></li>
+        <li>Instagram: <a href="https://instagram.com/tuparroquia" target="_blank" rel="noopener">@tuparroquia</a></li>
+        <li>Teléfono: <a href="tel:+50200000000">+502 0000-0000</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    // ========= Utilidades =========
+    const prefersReduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+
+    // ========= Modal =========
+    (function modal(){
+      const openBtn = document.getElementById('openModal');
+      const modal = document.getElementById('contactModal');
+      const closeBtn = document.getElementById('closeModal');
+
+      const open = () => {
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden','false');
+        // Enfocar botón cerrar para accesibilidad
+        setTimeout(()=> closeBtn?.focus(), 50);
+      };
+      const close = () => {
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden','true');
+        openBtn?.focus();
+      };
+
+      openBtn?.addEventListener('click', open);
+      closeBtn?.addEventListener('click', close);
+      modal?.addEventListener('click', e => { if(e.target === modal) close(); });
+      window.addEventListener('keydown', e => { if(e.key === 'Escape' && modal.classList.contains('open')) close(); });
+    })();
+
+    // ========= Interruptor de Tema (Día/Noche) =========
+    (function themeSwitch(){
+      const btn = document.getElementById('themeSwitch');
+      const body = document.body;
+      const currentTheme = localStorage.getItem('theme');
+
+      const setNight = (isNight) => {
+        body.classList.toggle('night-mode', isNight);
+        btn.textContent = isNight ? '☀️' : '🌙';
+        localStorage.setItem('theme', isNight ? 'night' : 'day');
+      };
+
+      // Aplicar tema guardado al cargar
+      if (currentTheme === 'night') {
+        setNight(true);
+      }
+
+      btn?.addEventListener('click', () => setNight(!body.classList.contains('night-mode')));
+    })();
+
+    // ========= Partículas luminosas =========
+    (function particles(){
+      const canvas = document.getElementById('particles');
+      if(!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let w = canvas.width = window.innerWidth;
+      let h = canvas.height = window.innerHeight;
+
+      let particles = [];
+      const baseCount = Math.min(140, Math.floor((w*h)/12000)); // densidad adaptativa
+      const MAX_ALPHA = 0.9;
+
+      function rand(min,max){ return Math.random()*(max-min)+min }
+      function createParticle(){
+        const speed = rand(0.08, 0.35);
+        return {
+          x: rand(0,w),
+          y: rand(0,h),
+          r: rand(0.6, 1.8),
+          vx: rand(-speed, speed),
+          vy: rand(-speed*0.4, speed*0.9),
+          a: rand(0.25, MAX_ALPHA),
+          hue: rand(50, 60) // dorado suave
+        };
+      }
+
+      function init(){
+        particles = [];
+        const count = prefersReduced ? Math.floor(baseCount*0.35) : baseCount;
+        for(let i=0;i<count;i++) particles.push(createParticle());
+      }
+
+      function draw(){
+        ctx.clearRect(0,0,w,h);
+        for(const p of particles){
+          p.x += p.vx;
+          p.y += p.vy;
+          // Reaparecer en bordes
+          if(p.x < -5) p.x = w+5; else if(p.x > w+5) p.x = -5;
+          if(p.y < -5) p.y = h+5; else if(p.y > h+5) p.y = -5;
+
+          const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r*6);
+          grd.addColorStop(0, `rgba(255,255,255,${p.a})`);
+          grd.addColorStop(0.4, `rgba(255,245,200,${p.a*0.5})`);
+          grd.addColorStop(1, 'rgba(255,255,255,0)');
+          ctx.fillStyle = grd;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r*6, 0, Math.PI*2);
+          ctx.fill();
+
+          // puntos núcleo
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(255,255,255,${Math.min(1, p.a+0.1)})`;
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+          ctx.fill();
+        }
+      }
+
+      let rafId;
+      function loop(){
+        draw();
+        rafId = requestAnimationFrame(loop);
+      }
+
+      function onResize(){
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+        init();
+      }
+
+      window.addEventListener('resize', onResize);
+      init();
+      if(!prefersReduced){ loop(); }
+      else { draw(); }
+
+      // Limpieza si se navega
+      window.addEventListener('beforeunload', ()=> cancelAnimationFrame(rafId));
+    })();
+
+    // Accesibilidad: salto al contenido (opcional)
+    (function skipLink(){
+      const a = document.createElement('a');
+      a.href="#titulo"; a.textContent="Saltar al contenido";
+      a.style.position="absolute"; a.style.left="-9999px";
+      a.style.top="8px"; a.style.background="#fff"; a.style.padding="8px 12px";
+      a.style.borderRadius="8px"; a.style.boxShadow="0 6px 16px rgba(0,0,0,0.15)";
+      a.style.zIndex="60";
+      a.addEventListener('focus',()=>{ a.style.left="8px"; });
+      a.addEventListener('blur',()=>{ a.style.left="-9999px"; });
+      document.body.prepend(a);
+    })();
+  </script>
+</body>
+</html>
